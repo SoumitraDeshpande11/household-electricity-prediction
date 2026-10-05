@@ -1,29 +1,115 @@
 {
+  "dataset_type": "real_meter_readings",
+  "households": 1,
+  "horizon_days": 30,
   "feature_columns": [
-    "household_size",
-    "number_of_rooms",
-    "appliance_count",
-    "ac_usage_hours",
-    "season",
-    "previous_month_consumption"
+    "previous_30_day_kwh",
+    "previous_7_day_mean_kwh",
+    "previous_day_kwh",
+    "kitchen_7_day_mean_kwh",
+    "laundry_7_day_mean_kwh",
+    "heating_ac_7_day_mean_kwh",
+    "month_sin",
+    "month_cos",
+    "season"
+  ],
+  "input_features": [
+    "previous_30_day_kwh",
+    "previous_7_day_mean_kwh",
+    "previous_day_kwh",
+    "kitchen_7_day_mean_kwh",
+    "laundry_7_day_mean_kwh",
+    "heating_ac_7_day_mean_kwh"
   ],
   "numeric_features": [
-    "household_size",
-    "number_of_rooms",
-    "appliance_count",
-    "ac_usage_hours",
-    "previous_month_consumption"
+    "previous_30_day_kwh",
+    "previous_7_day_mean_kwh",
+    "previous_day_kwh",
+    "kitchen_7_day_mean_kwh",
+    "laundry_7_day_mean_kwh",
+    "heating_ac_7_day_mean_kwh",
+    "month_sin",
+    "month_cos"
   ],
   "categorical_features": [
     "season"
   ],
-  "target_column": "monthly_consumption",
+  "target_column": "next_30_day_kwh",
+  "target_unit": "kWh",
   "season_options": [
     "Winter",
+    "Spring",
     "Summer",
-    "Monsoon",
     "Autumn"
   ],
-  "random_seed": 42,
-  "prediction_unit": "monthly units/kWh as defined by the generated panel"
+  "bounds": {
+    "previous_30_day_kwh": {
+      "min": 180.6979,
+      "max": 1245.6440333333335,
+      "median": 802.3718
+    },
+    "previous_7_day_mean_kwh": {
+      "min": 4.294657142857143,
+      "max": 45.38019523809523,
+      "median": 27.070980952380957
+    },
+    "previous_day_kwh": {
+      "min": 4.171633333333333,
+      "max": 67.16203333333334,
+      "median": 26.183416666666666
+    },
+    "kitchen_7_day_mean_kwh": {
+      "min": 0.0,
+      "max": 4.180000000000001,
+      "median": 1.6560714285714289
+    },
+    "laundry_7_day_mean_kwh": {
+      "min": 0.24771428571428572,
+      "max": 5.210428571428571,
+      "median": 1.8729999999999998
+    },
+    "heating_ac_7_day_mean_kwh": {
+      "min": 1.5295714285714286,
+      "max": 18.507571428571428,
+      "median": 10.01042857142857
+    }
+  },
+  "presets": [
+    {
+      "name": "Typical measured history",
+      "forecast_date": "2008-03-17",
+      "inputs": {
+        "previous_30_day_kwh": 802.4211333333333,
+        "previous_7_day_mean_kwh": 30.611795238095233,
+        "previous_day_kwh": 30.032666666666668,
+        "kitchen_7_day_mean_kwh": 1.9410000000000005,
+        "laundry_7_day_mean_kwh": 2.1688571428571426,
+        "heating_ac_7_day_mean_kwh": 9.967714285714285
+      }
+    },
+    {
+      "name": "Lower-demand history",
+      "forecast_date": "2010-06-30",
+      "inputs": {
+        "previous_30_day_kwh": 697.3965999999999,
+        "previous_7_day_mean_kwh": 20.471938095238098,
+        "previous_day_kwh": 22.800133333333335,
+        "kitchen_7_day_mean_kwh": 1.7207142857142856,
+        "laundry_7_day_mean_kwh": 1.1208571428571426,
+        "heating_ac_7_day_mean_kwh": 9.307428571428572
+      }
+    },
+    {
+      "name": "Higher-demand history",
+      "forecast_date": "2009-12-12",
+      "inputs": {
+        "previous_30_day_kwh": 950.0285,
+        "previous_7_day_mean_kwh": 33.629599999999996,
+        "previous_day_kwh": 29.741033333333334,
+        "kitchen_7_day_mean_kwh": 2.1907142857142854,
+        "laundry_7_day_mean_kwh": 1.332142857142857,
+        "heating_ac_7_day_mean_kwh": 12.295428571428571
+      }
+    }
+  ]
 }

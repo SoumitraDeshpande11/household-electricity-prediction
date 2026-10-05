@@ -1,39 +1,27 @@
 {
-  "dataset_name": "Household Electricity Consumption Prediction",
-  "synthetic": true,
-  "rows": 18000,
-  "households": 500,
-  "months_per_household": 36,
+  "download_source": "kaggle",
+  "download_url": "https://www.kaggle.com/api/v1/datasets/download/uciml/electric-power-consumption-data-set",
+  "archive_bytes": 20357475,
+  "raw_bytes": 132960755,
+  "raw_sha256": "4259c9d7ece5dbee9ab8d53682baac68d791c864f0f64a52b4043cb3b90894b7",
+  "dataset": "Individual Household Electric Power Consumption",
+  "synthetic": false,
+  "kaggle_url": "https://www.kaggle.com/datasets/uciml/electric-power-consumption-data-set",
+  "uci_url": "https://archive.ics.uci.edu/dataset/235/individual+household+electric+power+consumption",
+  "doi": "10.24432/C58K54",
+  "license": "CC BY 4.0",
+  "archive_sha256": "125ea23cde40b7f745d803ba32a712b41ae1900915fe4f60cc8abe9d00b79e45",
+  "raw_rows": 2075259,
+  "households": 1,
+  "horizon_days": 30,
   "date_range": [
-    "2022-01-01",
-    "2024-12-01"
+    "2006-12-16 17:24:00",
+    "2010-11-26 21:02:00"
   ],
-  "seed": 42,
-  "reference_calibration_kwh_median": 650.0,
-  "reference_calibration_mode": "fallback",
-  "reference_calibration_note": "fallback calibration based on the UCI dataset's monthly scale",
-  "source_urls": {
-    "kaggle": "https://www.kaggle.com/datasets/uciml/electric-power-consumption-data-set",
-    "uci": "https://archive.ics.uci.edu/dataset/235/individual+household+electric+power+consumption"
-  },
-  "columns": [
-    "household_id",
-    "month",
-    "season",
-    "household_size",
-    "number_of_rooms",
-    "appliance_count",
-    "ac_usage_hours",
-    "previous_month_consumption",
-    "monthly_consumption"
-  ],
-  "missing_counts": {
-    "household_size": 219,
-    "number_of_rooms": 220,
-    "appliance_count": 332,
-    "ac_usage_hours": 553,
-    "previous_month_consumption": 486
-  },
-  "target_missing_count": 0,
-  "sha256": "2f9f5f93eedc505062176d478fd3fdc6ed3f31cf2308ae01469067e8f129443a"
+  "missing_power_minutes": 25979,
+  "repaired_power_minutes": 156,
+  "max_forward_fill_minutes": 5,
+  "daily_rows": 1442,
+  "usable_energy_days": 1410,
+  "forecast_examples": 957
 }
