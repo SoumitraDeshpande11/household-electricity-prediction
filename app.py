@@ -41,9 +41,9 @@ def apply_preset(presets):
         p=presets[name]
         for k,v in p["inputs"].items(): st.session_state[f"input_{k}"]=float(v)
         st.session_state["forecast_date"]=date.fromisoformat(p["forecast_date"])
-        st.session_state["client_label"]=p["client_id"]; st.session_state.pop("forecast_result",None)
+        st.session_state["client_label"]=p["client_id"]; st.session_state["forecast_client"]=p["client_id"]; st.session_state.pop("forecast_result",None)
 
-def predict_tab(model, metrics, config):
+def predict_tab(model, metrics, config, tests):
     presets={p["name"]:p for p in config["presets"]}; default=config["presets"][0]
     for k,v in default["inputs"].items(): st.session_state.setdefault(f"input_{k}",float(v))
     st.session_state.setdefault("forecast_date",date.fromisoformat(default["forecast_date"]))
@@ -52,22 +52,34 @@ def predict_tab(model, metrics, config):
     with left:
         st.subheader("Forecast a measured client"); note("Use a real client-history preset or enter four history summaries. Calendar features follow the forecast date.")
         st.selectbox("Load a measured example",[*(presets),"Custom history"],key="client_preset",on_change=apply_preset,args=(presets,))
+        clients = config.get("client_ids", [])
+        selected_client = st.session_state.get("forecast_client", default["client_id"])
+        if selected_client not in clients:
+            selected_client = default["client_id"]
+        preset_is_custom = st.session_state.get("client_preset", "Custom history") == "Custom history"
+        client = st.selectbox("Measured client", clients, index=clients.index(selected_client), disabled=not preset_is_custom, help="Preset profiles use their recorded client. Choose Custom history to select another client.")
+        if not preset_is_custom:
+            st.caption(f"Preset inputs are measured history from {presets[st.session_state['client_preset']]['client_id']}. Choose Custom history to change the client.")
         with st.form("forecast_form"):
             a,b=st.columns(2); vals={}
             for i,k in enumerate(config["input_features"]):
                 with (a if i<2 else b):
                     lim=config["bounds"][k]; vals[k]=st.number_input(LABELS[k],min_value=0.0,step=1.0,key=f"input_{k}",help=f"Observed range: {lim['min']:.1f} to {lim['max']:.1f} kWh.")
             d=st.date_input("First day of forecast",key="forecast_date",min_value=date(2011,1,1),max_value=date(2035,12,31))
-            label=st.text_input("Client label for this scenario",value=st.session_state.get("client_label","Measured client"),key="client_label_input")
             submitted=st.form_submit_button("Forecast next 30 days",type="primary",width="stretch")
         vals.update(calendar_features(d))
         if submitted or "forecast_result" not in st.session_state:
             pred=max(0.0,float(model.predict(pd.DataFrame([vals],columns=config["feature_columns"]))[0]))
-            st.session_state["forecast_result"]={"prediction":pred,"inputs":vals.copy(),"date":d,"client":label,"example":not submitted}
-    result=st.session_state["forecast_result"]; pred,used=result["prediction"],result["inputs"]; rmse=metrics["test_metrics"]["RMSE"]
+            st.session_state["forecast_result"]={"prediction":pred,"inputs":vals.copy(),"date":d,"client":client,"example":not submitted}
+    result=st.session_state["forecast_result"]; pred,used=result["prediction"],result["inputs"]
+    client_tests=tests[tests.client_id.astype(str)==str(result["client"])] if "client_id" in tests.columns else tests.iloc[0:0]
+    if len(client_tests)>=3:
+        rmse=float(np.sqrt(np.mean((client_tests.actual-client_tests.predicted)**2)))
+        error_scope=f"{result['client']} holdout ({len(client_tests)} origins)"
+    else: rmse=float(metrics["test_metrics"]["RMSE"]); error_scope="pooled holdout"
     with right:
         st.subheader("Projected demand"); note(f"{result['client']} · {result['date']:%d %b %Y} – {(result['date']+timedelta(days=29)):%d %b %Y} · {used['season']}")
-        st.markdown(f'<div class="forecast-card"><div class="forecast-label">Predicted electricity consumption</div><div class="forecast-value">{pred:,.0f}<span>kWh / 30 days</span></div><div class="forecast-range">Planning range<br><strong>{max(0,pred-rmse):,.0f} – {pred+rmse:,.0f} kWh</strong><span style="opacity:.7"> · ±{rmse:,.0f} kWh pooled holdout RMSE</span></div></div>',unsafe_allow_html=True)
+        st.markdown(f'<div class="forecast-card"><div class="forecast-label">Predicted electricity consumption</div><div class="forecast-value">{pred:,.0f}<span>kWh / 30 days</span></div><div class="forecast-range">Planning range<br><strong>{max(0,pred-rmse):,.0f} – {pred+rmse:,.0f} kWh</strong><span style="opacity:.7"> · ±{rmse:,.0f} kWh · {error_scope}</span></div></div>',unsafe_allow_html=True)
         comp=pd.DataFrame({"Period":["Previous 30 days","Forecast 30 days"],"kWh":[used["previous_30_day_kwh"],pred],"color":["#68849d","#40d6c5"]})
         chart(alt.Chart(comp).mark_bar(cornerRadiusTopLeft=6,cornerRadiusTopRight=6,size=60).encode(x=alt.X("Period:N",title=None),y=alt.Y("kWh:Q",title="Energy · kWh"),color=alt.Color("color:N",scale=None,legend=None),tooltip=["Period:N",alt.Tooltip("kWh:Q",format=",.0f")]),180)
         st.caption(f"Selected by CV: {metrics['selected_model']}. Final holdout winner: {metrics['holdout_winner']}.")
@@ -141,7 +153,7 @@ def insights_tab(metrics,config):
         st.subheader("Error by season"); season=tests.groupby("season",as_index=False).agg(actual=("actual","mean"),predicted=("predicted","mean")).melt("season",var_name="Reading",value_name="kWh")
         chart(alt.Chart(season).mark_bar().encode(x=alt.X("season:N",sort=config["season_options"],title=None),xOffset="Reading:N",y=alt.Y("kWh:Q",title="Mean next-30-day kWh"),color=alt.Color("Reading:N",scale=alt.Scale(range=["#68849d","#40d6c5"]),legend=None),tooltip=["season:N","Reading:N",alt.Tooltip("kWh:Q",format=",.0f")]),260)
     with st.expander("Holdout predictions"):
-        st.dataframe(tests.head(200).round(2),hide_index=True,width="stretch"); st.download_button("Download holdout predictions",tests.to_csv(index=False),"holdout_predictions.csv","text/csv")
+        view=tests.head(200).copy(); num=view.select_dtypes(include="number").columns; view[num]=view[num].round(2); st.dataframe(view,hide_index=True,width="stretch"); st.download_button("Download holdout predictions",tests.to_csv(index=False),"holdout_predictions.csv","text/csv")
 
 def guide_tab(metrics,metadata):
     st.subheader("Project guide"); note("Real multi-client readings → daily kWh → causal history features → five regressors → Streamlit forecast.")
@@ -167,7 +179,7 @@ def main():
         st.divider(); st.metric("Holdout RMSE",f"{metrics['test_metrics']['RMSE']:,.0f} kWh"); st.markdown('<div class="side-note">UCI ElectricityLoadDiagrams20112014 · real multi-client readings · 30-day horizon.</div>',unsafe_allow_html=True)
     st.markdown('<div class="hero"><div class="eyebrow">Machine Learning · Case Study 27</div><h1>Electricity Load<br>Studio</h1><p>Forecast client demand from measured history.<br>Explore the patterns behind the next 30 days.</p><div class="hero-chips"><span>370 real clients</span><span>140k interval readings</span><span>5 regression models</span></div><svg class="hero-art" viewBox="0 0 300 220" aria-hidden="true"><circle cx="200" cy="120" r="95" fill="none" stroke="#a7e5e5" stroke-width="1"/><circle cx="200" cy="120" r="75" fill="none" stroke="#a7e5e5" stroke-width="1"/><path d="M30 170 H110 L128 148 L145 189 L168 150 L185 170 H270" fill="none" stroke="#a7e5e5" stroke-width="4"/></svg></div>',unsafe_allow_html=True)
     tabs=st.tabs(["Forecast","Data explorer","Model lab","Project guide"])
-    with tabs[0]: predict_tab(model,metrics,config)
+    with tabs[0]: predict_tab(model,metrics,config,csv_file(ARTIFACTS/"test_predictions.csv"))
     with tabs[1]: explorer_tab(frame,config,metadata)
     with tabs[2]: insights_tab(metrics,config)
     with tabs[3]: guide_tab(metrics,metadata)
