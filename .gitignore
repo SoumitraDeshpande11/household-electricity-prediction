@@ -15,6 +15,7 @@ env/
 kaggle.json
 data/raw/
 *.zip
+!data/source/household_power_consumption.zip
 *.7z
 *.7z.*
 *.csv.gz

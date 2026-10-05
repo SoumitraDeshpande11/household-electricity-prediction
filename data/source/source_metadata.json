@@ -1,0 +1,14 @@
+{
+  "download_source": "kaggle",
+  "download_url": "https://www.kaggle.com/api/v1/datasets/download/uciml/electric-power-consumption-data-set",
+  "archive_bytes": 20357475,
+  "raw_bytes": 132960755,
+  "raw_sha256": "4259c9d7ece5dbee9ab8d53682baac68d791c864f0f64a52b4043cb3b90894b7",
+  "dataset": "Individual Household Electric Power Consumption",
+  "synthetic": false,
+  "kaggle_url": "https://www.kaggle.com/datasets/uciml/electric-power-consumption-data-set",
+  "uci_url": "https://archive.ics.uci.edu/dataset/235/individual+household+electric+power+consumption",
+  "doi": "10.24432/C58K54",
+  "license": "CC BY 4.0",
+  "archive_sha256": "125ea23cde40b7f745d803ba32a712b41ae1900915fe4f60cc8abe9d00b79e45"
+}
