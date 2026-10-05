@@ -1,0 +1,29 @@
+{
+  "feature_columns": [
+    "household_size",
+    "number_of_rooms",
+    "appliance_count",
+    "ac_usage_hours",
+    "season",
+    "previous_month_consumption"
+  ],
+  "numeric_features": [
+    "household_size",
+    "number_of_rooms",
+    "appliance_count",
+    "ac_usage_hours",
+    "previous_month_consumption"
+  ],
+  "categorical_features": [
+    "season"
+  ],
+  "target_column": "monthly_consumption",
+  "season_options": [
+    "Winter",
+    "Summer",
+    "Monsoon",
+    "Autumn"
+  ],
+  "random_seed": 42,
+  "prediction_unit": "monthly units/kWh as defined by the generated panel"
+}
