@@ -1,86 +1,102 @@
 # Household Electricity Consumption Prediction
 
-This project implements **Case Study 27** for the B.Tech CSE Machine Learning course. It predicts a household's monthly electricity consumption from household characteristics, air-conditioner usage, season, and the previous month's consumption. The project is intentionally notebook-led so that the data assumptions, analysis, model comparison, and conclusions can be followed during an examination or viva.
+Case Study 27 · B.Tech CSE · Semester V Machine Learning
 
-## Data source and why the modelling table is synthetic
+A complete **real-data** regression project, with all analysis and training in [household_electricity_prediction.ipynb](household_electricity_prediction.ipynb) and a dark Streamlit dashboard with prediction, exploration, and model diagnostics.
 
-The reference consumption readings come from the [Individual Household Electric Power Consumption dataset](https://www.kaggle.com/datasets/uciml/electric-power-consumption-data-set) on Kaggle, originally published through the UCI Machine Learning Repository. It contains more than two million minute-level readings with active power, voltage, intensity, and sub-metering columns. The source data is useful for learning realistic seasonal and monthly consumption patterns, but it does not contain household size, rooms, appliance count, or a directly labelled AC-usage field for every record.
+## Actual dataset
 
-The repository therefore builds a reproducible synthetic household-month table. When a local source file is supplied, its monthly summaries anchor the scale; otherwise the builder uses its documented fallback scale. Household attributes and AC usage are generated with documented distributions and a fixed random seed, then combined with previous-month consumption and noise. This is the approach requested by the case study, and it avoids presenting invented household attributes as if they were measured Kaggle columns. The large raw download is deliberately not committed to Git. The builder works offline or can use a locally downloaded UCI/Kaggle file for calibration.
+We downloaded [Kaggle's Individual Household Electric Power Consumption dataset](https://www.kaggle.com/datasets/uciml/electric-power-consumption-data-set). It contains **2,075,259 minute readings from one household** in Sceaux, France, from December 2006 to November 2010. [Original UCI documentation](https://archive.ics.uci.edu/dataset/235/individual+household+electric+power+consumption).
 
-## Repository layout
+**No synthetic households, demographic attributes, or targets are generated.** The previous synthetic table and generator have been removed. The exact 19.4 MiB source ZIP is committed in data/source; the notebook extracts it and verifies its SHA-256. If absent, the notebook downloads the same real dataset. Extracted raw files are ignored by Git.
 
-```text
-.
-├── household_electricity_prediction.ipynb  # complete analysis and modelling record
-├── app.py                                  # Streamlit prediction application
-├── scripts/                                # optional reproducible data-building helpers
-├── data/                                   # source notes and generated data (if saved)
-├── artifacts/                              # winning model, metrics, and feature metadata
-├── requirements.txt
-└── README.md
-```
+The source does not contain household size, room count, appliance count, or separate AC hours. We adapt the case study to measured energy history and calendar inputs, rather than inventing those fields.
 
-## Setup
+## Forecast definition and missing readings
 
-Use Python 3.10 or newer. From the project directory:
+The output is **next-30-day energy consumption in kWh**, a standardised monthly horizon. It is not an exact calendar-month billing total. Daily forecast origins provide 957 labelled examples; these overlap and are not 957 independent households.
 
-```bash
-python -m venv .venv
-source .venv/bin/activate       # Windows PowerShell: .venv\Scripts\Activate.ps1
-python -m pip install --upgrade pip
-pip install -r requirements.txt
-```
+Global active power is kW averaged during each minute, so summing 1,440 values and dividing by 60 gives daily kWh. Submeter readings are Wh, converted to kWh by dividing summed readings by 1,000. The third circuit combines water heating and AC.
 
-From the repository root, reproduce the committed processed panel with:
+There are 25,979 missing power minutes. Forward filling for at most five minutes repairs 156 readings using only past measurements. Longer gaps stay missing; incomplete energy days and their target windows are excluded. This yields 1,410 usable days. Remaining historical input gaps are median-imputed within each training fold.
 
-```bash
-python3 scripts/build_dataset.py
-```
+The six history inputs are the previous 30-day total, previous seven-day daily average, previous-day total, and seven-day daily averages of kitchen, laundry, and combined water-heater/AC energy. Month sine/cosine and one-hot season add calendar information. Every historical input ends before its forecast starts.
 
-The default build creates 500 households observed for 36 months (18,000 rows) at `data/processed/household_monthly_panel.csv`. To calibrate against a local source download, pass `--reference-path data/raw/household_power_consumption.txt`; no network download is required by the project. Open `household_electricity_prediction.ipynb` in Jupyter or VS Code and run the cells from top to bottom. The notebook reports missing readings and their treatment, encodes the season, trains all five required regressors, and saves the selected model and metrics under `artifacts/` for the application. Keep any raw Kaggle file under a local data directory and do not add it to Git.
+## Run the notebook and app
 
-## What the notebook covers
+Use Python 3.11 or newer. Model loading uses scikit-learn 1.8.0, the version used for the committed artifact.
 
-The analysis answers the case-study questions with computed evidence rather than fixed claims:
+~~~bash
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.txt
+jupyter notebook household_electricity_prediction.ipynb
+~~~
 
-- exploratory summaries and plots for household attributes, monthly consumption, and seasons;
-- missing-meter simulation and imputation, with the number of affected readings reported;
-- previous-month consumption as a predictor and the effect of seasonal encoding;
-- Linear Regression, Polynomial Regression, Decision Tree, Random Forest, and Gradient Boosting regressors;
-- hold-out evaluation and five-fold cross-validation using R², MSE, RMSE, and MAE;
-- actual-versus-predicted and residual plots for the selected model;
-- feature influence, seasonal error checks, constant-variance discussion, and limitations.
+Choose **Restart Kernel and Run All Cells**. The executed notebook already includes the EDA figures, model comparisons, residual analysis, and answers to the case-study questions.
 
-RMSE is the primary planning measure because it is expressed in the same units as monthly consumption. The model is selected from the measured validation results, with the lowest suitable cross-validated RMSE preferred. The notebook records the exact split, preprocessing, random seed, and winning metrics so the result is reproducible.
+Alternatively, execute it without opening Jupyter:
 
-## Run the Streamlit application
-
-After running the notebook and creating the artifacts:
-
-```bash
+~~~bash
+python -m jupyter nbconvert --to notebook --execute --inplace household_electricity_prediction.ipynb --ExecutePreprocessor.timeout=600
+python validate_project.py
 streamlit run app.py
-```
+~~~
 
-The application follows the layout of the Wine Quality Predictor: a styled hero, example profiles, a prominent forecast card, and four tabs:
+The source archive is bundled, so rebuilding does not require Kaggle credentials. All ML logic is in the notebook; there is no separate training or data-generation script.
 
-- **Predict consumption** accepts a household profile, shows the expected error range, and compares controlled season and AC-usage scenarios. Submitted predictions remain visible when exploring the other tabs.
-- **Data explorer** filters records by season and year, plots household attributes and monthly histories, and downloads the filtered dataset.
-- **Model insights** compares all five regressors and shows held-out actual-versus-predicted, residual, feature-influence, and seasonal-performance charts.
-- **Project guide** explains the inputs, generation assumptions, evaluation, and limitations.
+## Evaluation and results
 
-The visual theme is defined in `.streamlit/config.toml` and `assets/app.css`. Interactive charts use Altair. Input bounds follow observed ranges in the processed dataset.
+We hold out the latest 192 forecast origins, starting 9 December 2009. The earlier training partition contains 736 origins; 29 boundary origins are discarded so training targets cannot overlap holdout targets.
 
-Enter household size, number of rooms, appliance count, AC usage, season, and previous-month consumption. The app displays the predicted monthly consumption, the selected model, and an expected error range. The range is based on the validation RMSE (approximately `prediction ± RMSE`, clipped at zero where appropriate); it is a practical planning interval, not a formal prediction interval or a guarantee for an individual bill.
+Model selection uses **five expanding time-series folds with a 30-row gap**, at least 30 calendar days. Preprocessing is fitted separately in each fold. All five required regressors are compared:
 
-If the app reports missing artifacts, run the notebook once more from the first cell so that the model, metrics, feature configuration, and any preprocessing objects are saved into `artifacts/`.
+| Model | Mean CV RMSE (kWh) | CV standard deviation | Holdout RMSE (kWh) | Holdout MAE (kWh) | Holdout R² |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Linear Regression | 165.54 | 134.12 | 80.04 | 66.84 | 0.735 |
+| Polynomial Regression (degree 2) | 565.72 | 855.10 | 96.08 | 76.99 | 0.618 |
+| Decision Tree Regressor | 143.50 | 57.08 | 59.68 | 41.42 | 0.853 |
+| **Random Forest Regressor** | **119.43** | 45.22 | 56.16 | 43.11 | 0.870 |
+| Gradient Boosting Regressor | 121.30 | 43.36 | **45.62** | **34.97** | **0.914** |
 
-The notebook also exports `artifacts/test_predictions.csv` and `artifacts/feature_importance.csv`. Diagnostic charts use the held-out model's predictions, while the prediction form uses the deployment pipeline refitted on the full dataset. Feature influence is the increase in test RMSE after shuffling an original input, averaged over five shuffles; correlated inputs can share predictive information.
+**Random Forest is selected by training CV.** Gradient Boosting has the lowest final holdout RMSE; we report that distinction and do not select retrospectively using the holdout. The high fold variability also limits confidence in the small CV difference.
 
-## Limitations and real-world use
+On the same 99 holdout origins with complete prior 30-day history, Random Forest RMSE is **50.14 kWh**, compared with **133.19 kWh** for repeating the previous 30-day total. The full Random Forest holdout MSE is 3,153.90 kWh².
 
-This model demonstrates the requested workflow and supports an academic demand-forecasting prototype. It is not a utility billing system. The generated household attributes are assumptions, the source data represents one household rather than a diverse utility population, and weather, tariff, occupancy schedules, holidays, solar generation, and appliance-level behaviour are absent. These omissions can cause systematic error, especially during unusual heat or cold. A production forecast should retrain on interval readings from the target service area, join reliable weather and calendar data, monitor drift, and report uncertainty alongside the point prediction.
+Season and month cosine have the greatest permutation importance for this fitted model. This is predictive reliance, not a causal household effect. Residual standard deviations differ by **4.59×** across prediction bands, and lag-one residual correlation is **0.811**. Constant variance and independent errors are not established.
 
-## Reproducibility notes
+Only 16 holdout targets contain no repaired power minutes; their RMSE is 50.00 kWh. This small sensitivity subset cannot establish broad robustness.
 
-All random generation and model settings are kept in the notebook or accompanying scripts. Do not commit Kaggle credentials, downloaded raw files, virtual environments, notebook checkpoints, caches, or generated logs. The committed notebook, source notes, and saved lightweight artifacts are sufficient for review; a fresh raw download may be needed to rebuild the reference monthly summaries.
+## Streamlit dashboard
+
+- **Predict consumption:** actual recorded history presets, six meter-history inputs, forecast date, next-30-day prediction, ±RMSE range, and calendar/history sensitivity charts.
+- **Data explorer:** daily demand, seasonal demand, circuit consumption, meter coverage, season/year filters, and CSV download.
+- **Model insights:** all five models, CV variability, persistence comparison, actual-versus-predicted and residual plots, permutation importance, seasonal performance, and holdout time plots.
+- **Project guide:** real-source provenance, preprocessing, metrics, and limitations.
+
+The deployment pipeline is refitted on all labelled examples after evaluation. Saved holdout predictions remain from the training-only fit. Historical app examples are demonstrations, not new test results.
+
+For Streamlit Community Cloud, select this repository, branch main, and entry point app.py. The committed model and processed tables allow the app to start without rerunning training. [Open Streamlit deployment](https://share.streamlit.io/deploy).
+
+## Files
+
+| File | Purpose |
+| --- | --- |
+| household_electricity_prediction.ipynb | Complete executed download, cleaning, EDA, training, evaluation, and export workflow |
+| app.py | Interactive dashboard loading notebook artifacts |
+| data/source/household_power_consumption.zip | Exact real Kaggle source download |
+| data/source/source_metadata.json | URLs, hashes, size, DOI, and license |
+| data/processed/daily_consumption.csv | Daily measured demand and coverage/repair flags |
+| data/processed/forecast_records.csv | Causal historical inputs and actual future 30-day targets |
+| artifacts/best_model.joblib | Selected preprocessing + regression pipeline, refitted for deployment |
+| artifacts/metrics.json | All five model scores, baseline, splits, and residual diagnostics |
+| artifacts/test_predictions.csv | Predictions from the untouched chronological holdout |
+| validate_project.py | Source, aggregation, feature timing, evaluation, and artifact checks |
+
+## Limitations
+
+This dataset is one French home measured in 2006–2010. Holdout performance describes later periods of that home, **not new households**. Demographic factors and weather are unavailable. Adjacent targets overlap, reducing the effective sample size despite leakage-prevention gaps. Short-gap repair introduces an assumption; exclusions may bias coverage. Season is an incomplete substitute for temperature and occupancy.
+
+The ±RMSE range is a rough planning aid with no guaranteed probability coverage. Operational deployment requires recent multi-household data, weather, time-aware uncertainty calibration, and prospective validation. A 30-day energy forecast cannot determine instantaneous peak grid capacity.
+
+Source attribution: Hebrail, G. & Berard, A. (2006), Individual Household Electric Power Consumption, UCI Machine Learning Repository, DOI 10.24432/C58K54, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Daily aggregation, documented gap repair, feature engineering, and modeling are this project's transformations.
