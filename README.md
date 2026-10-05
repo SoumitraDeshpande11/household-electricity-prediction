@@ -62,6 +62,13 @@ After running the notebook and creating the artifacts:
 streamlit run app.py
 ```
 
+The app has four pages in the sidebar:
+
+- **Overview** shows record counts, validation cards, seasonal averages, and the monthly demand trend.
+- **Predict** accepts a household profile and returns the forecast with its RMSE-based planning range.
+- **Explore data** shows seasonal consumption spreads, previous-month relationships, and a filtered summary table.
+- **Model diagnostics** compares all five regressors and displays actual-versus-predicted and residual plots.
+
 Enter household size, number of rooms, appliance count, AC usage, season, and previous-month consumption. The app displays the predicted monthly consumption, the selected model, and an expected error range. The range is based on the validation RMSE (approximately `prediction ± RMSE`, clipped at zero where appropriate); it is a practical planning interval, not a formal prediction interval or a guarantee for an individual bill.
 
 If the app reports missing artifacts, run the notebook once more from the first cell so that the model, metrics, feature configuration, and any preprocessing objects are saved into `artifacts/`.
