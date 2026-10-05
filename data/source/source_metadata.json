@@ -1,14 +1,13 @@
 {
-  "download_source": "kaggle",
-  "download_url": "https://www.kaggle.com/api/v1/datasets/download/uciml/electric-power-consumption-data-set",
-  "archive_bytes": 20357475,
-  "raw_bytes": 132960755,
-  "raw_sha256": "4259c9d7ece5dbee9ab8d53682baac68d791c864f0f64a52b4043cb3b90894b7",
-  "dataset": "Individual Household Electric Power Consumption",
+  "download_source": "UCI Machine Learning Repository",
+  "download_url": "https://archive.ics.uci.edu/static/public/321/electricityloaddiagrams20112014.zip",
+  "dataset": "ElectricityLoadDiagrams20112014",
   "synthetic": false,
-  "kaggle_url": "https://www.kaggle.com/datasets/uciml/electric-power-consumption-data-set",
-  "uci_url": "https://archive.ics.uci.edu/dataset/235/individual+household+electric+power+consumption",
-  "doi": "10.24432/C58K54",
+  "uci_url": "https://archive.ics.uci.edu/dataset/321/electricityloaddiagrams20112014",
+  "doi": "10.24432/C58C86",
   "license": "CC BY 4.0",
-  "archive_sha256": "125ea23cde40b7f745d803ba32a712b41ae1900915fe4f60cc8abe9d00b79e45"
+  "archive_bytes": 261335609,
+  "raw_bytes": 710998915,
+  "archive_sha256": "f6c4d0e0df12ecdb9ea008dd6eef3518adb52c559d04a9bac2e1b81dcfc8d4e1",
+  "raw_sha256": "d51565f2cb5a6b768d06ba1bbd3c084c6e2f3aab07f00c6f2dcb80e90175124b"
 }

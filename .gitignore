@@ -11,11 +11,10 @@ env/
 *.env
 .DS_Store
 
-# Kaggle credentials and downloaded raw data (the source is documented in README)
+# Dataset credentials and downloaded raw data (the source manifest is committed)
 kaggle.json
 data/raw/
 *.zip
-!data/source/household_power_consumption.zip
 *.7z
 *.7z.*
 *.csv.gz

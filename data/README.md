@@ -1,57 +1,46 @@
 # Real meter data and transformations
 
-The source is Kaggle's copy of **Individual Household Electric Power Consumption**, originally published by UCI. Download and every processing step are implemented in household_electricity_prediction.ipynb.
+All source download and processing steps are implemented in `household_electricity_prediction.ipynb`.
 
-- Kaggle: https://www.kaggle.com/datasets/uciml/electric-power-consumption-data-set
-- UCI: https://archive.ics.uci.edu/dataset/235/individual+household+electric+power+consumption
-- Attribution: Hebrail, G. and Berard, A. (2006), DOI 10.24432/C58K54.
-- License: CC BY 4.0.
-- Download: public Kaggle API, no credentials required for the bundled archive.
-- Archive size: 20,357,475 bytes. Extracted file: 132,960,755 bytes.
-- Archive SHA-256: 125ea23cde40b7f745d803ba32a712b41ae1900915fe4f60cc8abe9d00b79e45.
-- Raw TXT SHA-256: 4259c9d7ece5dbee9ab8d53682baac68d791c864f0f64a52b4043cb3b90894b7.
+- Dataset: [UCI ElectricityLoadDiagrams20112014](https://archive.ics.uci.edu/dataset/321/electricityloaddiagrams20112014)
+- Download URL: `https://archive.ics.uci.edu/static/public/321/electricityloaddiagrams20112014.zip`
+- Attribution: UCI Machine Learning Repository, DOI `10.24432/C58C86`
+- License: CC BY 4.0
+- Source size: 261,335,609-byte ZIP; 710,998,915-byte extracted text file
+- Archive SHA-256: `f6c4d0e0df12ecdb9ea008dd6eef3518adb52c559d04a9bac2e1b81dcfc8d4e1`
+- Raw TXT SHA-256: `d51565f2cb5a6b768d06ba1bbd3c084c6e2f3aab07f00c6f2dcb80e90175124b`
 
-## Files
+The archive is too large for GitHub's file limit and is therefore downloaded into ignored `data/raw/uci_load_diagrams/`. `data/source/source_metadata.json` is the reproducibility manifest. The notebook verifies the archive and extracted file hashes before reading them. No synthetic source table, target, household, or fallback generator is used.
 
-The exact downloaded ZIP and manifest are in source/. The notebook extracts the TXT into ignored raw/. No randomly generated source table, households, or targets are used.
+## Processed tables
 
-processed/daily_consumption.csv contains 1,442 calendar days and 1,410 usable energy days. It retains original observed-minute counts, repaired-minute counts, unresolved-minute counts, and the usable-energy flag.
+`processed/daily_consumption.csv` contains 540,200 rows: 1,460 complete dates × 370 clients. Each row contains daily kWh, client ID, year, month, season, and the 96 observed quarter-hour readings flag. Source zeros before a client's activation are retained as published.
 
-processed/forecast_records.csv contains 957 forecast origins with next-30-day targets. Records describe **one home**, not 957 homes. Their targets overlap.
+`processed/forecast_records.csv` contains 71,040 rows from 192 weekly origins × 370 clients. Each target is the measured energy from `forecast_date` through `forecast_date + 29 days`. Targets overlap across weekly origins and therefore are not independent household examples.
 
-processed/dataset_metadata.json contains reproducible source and processing counts.
+`processed/dataset_metadata.json` records source hashes, row/client/date counts, units, and date bounds.
 
 ## Units and missing readings
 
-The 2,075,259 rows record one minute each. Global_active_power is mean kW; daily kWh = sum of minute power / 60. Sub_metering_1/2/3 contain minute Wh; daily circuit kWh = sum / 1,000.
-
-The source uses '?' for missing readings. Of 25,979 missing power minutes, 156 are repaired with causal forward filling limited to five minutes. The first five minutes of a longer gap can be filled, but the day remains unusable if any unresolved power reading remains. Partial days are also excluded from targets.
-
-Every 30-day target requires 30 usable energy days. Repair counts for each target are retained. Historical input gaps are allowed and later median-imputed using each model's training partition only.
+The source values are average kW for each 15-minute interval. Daily energy is `sum(96 readings) / 4`, yielding kWh. The source table has no missing cells, so no readings are imputed. Partial endpoint dates are excluded from daily aggregation; complete dates have exactly 96 readings.
 
 ## Model inputs and target
 
 | Column | Definition |
 | --- | --- |
-| forecast_date | First day of the predicted period |
-| previous_30_day_kwh | Total energy over the preceding 30 days |
-| previous_7_day_mean_kwh | Mean daily energy over the preceding seven days |
-| previous_day_kwh | Energy on the immediately preceding day |
-| kitchen_7_day_mean_kwh | Seven-day mean kitchen-circuit energy |
-| laundry_7_day_mean_kwh | Seven-day mean laundry-circuit energy |
-| heating_ac_7_day_mean_kwh | Seven-day mean combined water-heater and AC circuit energy |
-| month_sin, month_cos | Cyclic month encoding, derived from forecast_date |
-| season | Winter, Spring, Summer, or Autumn in France |
-| next_30_day_kwh | Actual energy from forecast_date through forecast_date + 29 days |
-| target_repaired_minutes | Number of short-gap repaired power minutes within that target |
-| forecast_end | Last day contributing to the target |
+| `forecast_date` | First day of the predicted 30-day period |
+| `previous_30_day_kwh` | Total energy over the preceding 30 days |
+| `previous_7_day_mean_kwh` | Mean daily energy over the preceding seven days |
+| `previous_day_kwh` | Energy on the immediately preceding day |
+| `previous_90_day_mean_kwh` | Mean daily energy over the preceding 90 days |
+| `month_sin`, `month_cos` | Cyclic month encoding from `forecast_date` |
+| `season` | Winter, Spring, Summer, or Autumn |
+| `next_30_day_kwh` | Actual target energy over the 30-day horizon |
 
-Each historical input ends before forecast_date. Calendar season is based on the origin month, not an entire horizon spanning seasons. The forecast is a fixed 30-day horizon and does not claim to match a calendar billing month.
-
-Household size, rooms, appliance count, and separate AC hours are **absent**. Sub_metering_3 combines water heating and air conditioning; it cannot isolate AC use.
+Every history feature ends before `forecast_date`; only calendar fields describe the forecast origin. Client ID is retained for evaluation and app context but is not used as a model feature.
 
 ## Evaluation boundary
 
-The latest approximately 20% of valid origins form the holdout. Training origins whose target reaches the holdout start are discarded. Five expanding training folds use a 30-row gap; assertions check target date boundaries. Validation origins may still overlap one another, so their errors are correlated.
+The latest 20% of weekly origins form the holdout. Earlier origins whose target would reach the holdout are excluded. Five expanding time-series folds use a five-origin gap, which is at least 35 days. A separate deterministic client-holdout check evaluates 74 clients not used during fitting, while still supplying their preceding history. This does not measure a completely new client without any history.
 
-The one-home source cannot support claims about performance on new homes. Reproduce all transformations by running the notebook from a fresh kernel.
+Reproduce the processed data, plots, models, and artifacts by running the notebook from a fresh kernel, then run `python validate_project.py`.
