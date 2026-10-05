@@ -11,7 +11,7 @@ import streamlit as st
 ROOT = Path(__file__).resolve().parent
 ARTIFACTS = ROOT / "artifacts"
 DATA_PATH = ROOT / "data/processed/household_monthly_panel.csv"
-COLORS = ["#5288af", "#e3a044", "#0d9da3", "#ba8368"]
+COLORS = ["#86b8e2", "#efb65f", "#40c9bd", "#cf9e86"]
 LABELS = {
     "household_size": "Household size",
     "number_of_rooms": "Number of rooms",
@@ -54,11 +54,11 @@ def chart_style(chart, height=270):
         chart.properties(height=height, background="transparent")
         .configure_view(stroke=None)
         .configure_axis(
-            labelColor="#607485", titleColor="#607485", labelFontSize=11,
+            labelColor="#a1b4c7", titleColor="#a1b4c7", labelFontSize=11,
             titleFontSize=11, titleFontWeight=500, domain=False, tickSize=0,
-            gridColor="#eaf0f4", labelPadding=9, titlePadding=12,
+            gridColor="#243244", labelPadding=9, titlePadding=12,
         )
-        .configure_legend(labelColor="#607485", title=None, orient="bottom")
+        .configure_legend(labelColor="#a1b4c7", title=None, orient="bottom")
     )
 
 
@@ -170,7 +170,7 @@ def forecast_tab(frame, model, metrics, config):
         comparison = pd.DataFrame({
             "Month": ["Previous month", "Predicted month"],
             "kWh": [previous, prediction],
-            "color": ["#b6c8d4", "#087f8c"],
+            "color": ["#68849d", "#40d6c5"],
         })
         show_chart(
             alt.Chart(comparison).mark_bar(cornerRadiusTopLeft=6, cornerRadiusTopRight=6, size=55).encode(
@@ -207,7 +207,7 @@ def forecast_tab(frame, model, metrics, config):
         st.subheader("What if AC usage changes?")
         note("The selected household stays fixed while monthly AC hours change.")
         show_chart(
-            alt.Chart(usage_inputs).mark_line(color="#087f8c", strokeWidth=3).encode(
+            alt.Chart(usage_inputs).mark_line(color="#40d6c5", strokeWidth=3).encode(
                 x=alt.X("ac_usage_hours:Q", title="AC usage · hours/month"),
                 y=alt.Y("Forecast:Q", title="Predicted consumption · kWh", scale=alt.Scale(zero=False)),
                 tooltip=[alt.Tooltip("ac_usage_hours:Q", format=".0f", title="AC hours"), alt.Tooltip("Forecast:Q", format=".1f", title="Forecast · kWh")],
@@ -260,7 +260,7 @@ def explorer_tab(frame, config):
             y=alt.Y("monthly_consumption:Q", title="Average consumption · kWh"),
             tooltip=[alt.Tooltip("month:T", title="Month", format="%b %Y"), alt.Tooltip("monthly_consumption:Q", title="Average · kWh", format=".1f")],
         )
-        show_chart(base.mark_area(color="#087f8c", opacity=.09) + base.mark_line(color="#087f8c", strokeWidth=2.5))
+        show_chart(base.mark_area(color="#40d6c5", opacity=.09) + base.mark_line(color="#40d6c5", strokeWidth=2.5))
 
     left, right = st.columns(2)
     with left, st.container(border=True):
@@ -281,7 +281,7 @@ def explorer_tab(frame, config):
         household = st.selectbox("Household", sorted(filtered["household_id"].unique()))
         history = filtered[filtered["household_id"] == household]
         show_chart(
-            alt.Chart(history).mark_line(point=True, color="#087f8c", strokeWidth=2.5).encode(
+            alt.Chart(history).mark_line(point=True, color="#40d6c5", strokeWidth=2.5).encode(
                 x=alt.X("month:T", title=None, axis=alt.Axis(format="%b %y", labelAngle=-25)),
                 y=alt.Y("monthly_consumption:Q", title="Monthly consumption · kWh", scale=alt.Scale(zero=False)),
                 tooltip=[alt.Tooltip("month:T", format="%b %Y"), alt.Tooltip("monthly_consumption:Q", format=".1f", title="Consumption · kWh"), "season:N"],
@@ -318,8 +318,8 @@ def insights_tab(metrics, config):
             x=alt.X("CV_RMSE:Q", title="Mean cross-validation RMSE · kWh", scale=alt.Scale(domain=[0, float(comparison["CV_RMSE"].max()) * 1.2])),
         )
         show_chart(
-            bars.mark_bar(cornerRadiusEnd=5, height=24).encode(color=alt.condition(alt.datum.Winner, alt.value("#087f8c"), alt.value("#b5c8d4")), tooltip=["Model:N", alt.Tooltip("CV_RMSE:Q", format=".2f")])
-            + bars.mark_text(align="left", dx=7, color="#244354").encode(text=alt.Text("CV_RMSE:Q", format=".2f")), 230,
+            bars.mark_bar(cornerRadiusEnd=5, height=24).encode(color=alt.condition(alt.datum.Winner, alt.value("#40d6c5"), alt.value("#68849d")), tooltip=["Model:N", alt.Tooltip("CV_RMSE:Q", format=".2f")])
+            + bars.mark_text(align="left", dx=7, color="#d6e5ef").encode(text=alt.Text("CV_RMSE:Q", format=".2f")), 230,
         )
     with right, st.container(border=True):
         st.subheader("All evaluation metrics")
@@ -337,22 +337,22 @@ def insights_tab(metrics, config):
         st.subheader("Actual versus predicted")
         note("Each point is a held-out household-month reading. The line marks a perfect forecast.")
         bounds = [float(tests[["actual", "predicted"]].min().min()), float(tests[["actual", "predicted"]].max().max())]
-        points = alt.Chart(tests).mark_circle(size=16, opacity=.3, color="#087f8c").encode(
+        points = alt.Chart(tests).mark_circle(size=16, opacity=.3, color="#40d6c5").encode(
             x=alt.X("predicted:Q", title="Predicted consumption · kWh"),
             y=alt.Y("actual:Q", title="Actual consumption · kWh"),
             tooltip=["household_id:N", "season:N", alt.Tooltip("actual:Q", format=".1f"), alt.Tooltip("predicted:Q", format=".1f")],
         )
-        diagonal = alt.Chart(pd.DataFrame({"x": bounds, "y": bounds})).mark_line(strokeDash=[5, 5], color="#bd8c51").encode(x="x:Q", y="y:Q")
+        diagonal = alt.Chart(pd.DataFrame({"x": bounds, "y": bounds})).mark_line(strokeDash=[5, 5], color="#efb65f").encode(x="x:Q", y="y:Q")
         show_chart(points + diagonal)
     with right, st.container(border=True):
         st.subheader("Residuals versus predicted")
         note("Residual = actual − predicted. An even spread around zero is desirable.")
-        points = alt.Chart(tests).mark_circle(size=16, opacity=.3, color="#5288af").encode(
+        points = alt.Chart(tests).mark_circle(size=16, opacity=.3, color="#86b8e2").encode(
             x=alt.X("predicted:Q", title="Predicted consumption · kWh"),
             y=alt.Y("residual:Q", title="Residual · kWh"),
             tooltip=[alt.Tooltip("predicted:Q", format=".1f"), alt.Tooltip("residual:Q", format=".1f"), "season:N"],
         )
-        zero = alt.Chart(pd.DataFrame({"zero": [0]})).mark_rule(strokeDash=[5, 5], color="#bd8c51").encode(y="zero:Q")
+        zero = alt.Chart(pd.DataFrame({"zero": [0]})).mark_rule(strokeDash=[5, 5], color="#efb65f").encode(y="zero:Q")
         show_chart(points + zero)
 
     left, right = st.columns(2)
@@ -364,7 +364,7 @@ def insights_tab(metrics, config):
             influence = csv_file(importance_path)
             influence["Input"] = influence["feature"].map(LABELS)
             show_chart(
-                alt.Chart(influence).mark_bar(cornerRadiusEnd=5, color="#087f8c", height=22).encode(
+                alt.Chart(influence).mark_bar(cornerRadiusEnd=5, color="#40d6c5", height=22).encode(
                     y=alt.Y("Input:N", sort=alt.SortField(field="rmse_increase", order="descending"), title=None),
                     x=alt.X("rmse_increase:Q", title="Increase in RMSE · kWh"),
                     tooltip=["Input:N", alt.Tooltip("rmse_increase:Q", format=".2f", title="RMSE increase")],
@@ -380,7 +380,7 @@ def insights_tab(metrics, config):
                 x=alt.X("season:N", sort=config["season_options"], title=None, axis=alt.Axis(labelAngle=0)),
                 xOffset="Reading:N",
                 y=alt.Y("kWh:Q", title="Mean monthly consumption · kWh"),
-                color=alt.Color("Reading:N", scale=alt.Scale(domain=["actual", "predicted"], range=["#b5c8d4", "#087f8c"])),
+                color=alt.Color("Reading:N", scale=alt.Scale(domain=["actual", "predicted"], range=["#68849d", "#40d6c5"])),
                 tooltip=["season:N", "Reading:N", alt.Tooltip("kWh:Q", format=".1f")],
             ), 220,
         )

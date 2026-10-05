@@ -1,28 +1,28 @@
 .stMainBlockContainer {max-width: 1240px; padding-top: 3.25rem; padding-bottom: 3rem;}
-[data-testid="stSidebar"] {background: #edf2f5; border-right: 1px solid #dfe7ed;}
+[data-testid="stSidebar"] {background: #0f1927; border-right: 1px solid #27384b;}
 [data-testid="stSidebar"] h2 {font-size: 1.35rem;}
 [data-testid="stSidebar"] p {font-size: .88rem; line-height: 1.6;}
-.hero {position: relative; overflow: hidden; border-radius: 22px; padding: 2rem 2.2rem 1.8rem; background: linear-gradient(120deg, #102c3c 0%, #075b68 64%, #138e91 100%); color: white; margin-bottom: 1.25rem; box-shadow: 0 12px 30px #102c3c18;}
+.hero {position: relative; overflow: hidden; border-radius: 22px; padding: 2rem 2.2rem 1.8rem; background: linear-gradient(120deg, #142b3d 0%, #064652 64%, #087b80 100%); color: white; margin-bottom: 1.25rem; box-shadow: 0 12px 30px #00000035;}
 .hero h1 {font-size: clamp(1.8rem, 2.8vw, 2.65rem); letter-spacing: -.04em; color: #fff; line-height: 1.15; margin: .6rem 0 .65rem; padding: 0; max-width: 720px;}
 .hero p {color: #d4edef; max-width: 600px; font-size: 1rem; line-height: 1.6; margin-bottom: 1rem;}
 .eyebrow {font-size: .7rem; font-weight: 750; letter-spacing: .16em; text-transform: uppercase; color: #9ee3df;}
 .hero-chips {display: flex; gap: .55rem; flex-wrap: wrap;}
 .hero-chips span {font-size: .73rem; color: #e2f5f5; border: 1px solid #ffffff28; border-radius: 30px; padding: .32rem .65rem; background: #ffffff0b;}
 .hero-art {position: absolute; right: -12px; bottom: -20px; width: 270px; opacity: .32; pointer-events: none;}
-.brand {font-size: 1.15rem; font-weight: 800; letter-spacing: -.035em; margin-bottom: .2rem; color: #102c3c;}
-.brand span {color: #087f8c;}
-.side-label {font-size: .7rem; text-transform: uppercase; letter-spacing: .09em; font-weight: 700; color: #52707e; margin: 1.1rem 0 .2rem;}
-.side-value {font-size: .95rem; color: #152738; font-weight: 650;}
-.side-note {font-size: .8rem; color: #5f7382; line-height: 1.6; margin-top: 1.2rem;}
-.section-note {font-size: .88rem; color: #607485; line-height: 1.6; margin: -.4rem 0 .9rem;}
-[data-testid="stTabs"] [data-baseweb="tab-list"] {gap: 1.6rem; border-bottom: 1px solid #dbe4eb; margin-bottom: .8rem;}
+.brand {font-size: 1.15rem; font-weight: 800; letter-spacing: -.035em; margin-bottom: .2rem; color: #e5edf5;}
+.brand span {color: #40d6c5;}
+.side-label {font-size: .7rem; text-transform: uppercase; letter-spacing: .09em; font-weight: 700; color: #94adbf; margin: 1.1rem 0 .2rem;}
+.side-value {font-size: .95rem; color: #e5edf5; font-weight: 650;}
+.side-note {font-size: .8rem; color: #9aafc2; line-height: 1.6; margin-top: 1.2rem;}
+.section-note {font-size: .88rem; color: #a1b4c7; line-height: 1.6; margin: -.4rem 0 .9rem;}
+[data-testid="stTabs"] [data-baseweb="tab-list"] {gap: 1.6rem; border-bottom: 1px solid #27384b; margin-bottom: .8rem;}
 [data-testid="stTabs"] [data-baseweb="tab"] {font-weight: 650; font-size: .91rem; padding: .7rem 0;}
-[data-testid="stVerticalBlockBorderWrapper"] > div {border-radius: 17px !important; background-color: #fff; border-color: #dfe7ed !important;}
-[data-testid="stForm"] {border-radius: 17px; background: #fff; border-color: #dfe7ed; padding: 1.3rem;}
-[data-testid="stFormSubmitButton"] button {border-radius: 10px; height: 2.8rem; font-weight: 650;}
-[data-testid="stMetric"] {background: #fff; border: 1px solid #dfe7ed; border-radius: 14px; padding: 1rem 1.15rem;}
-[data-testid="stMetricLabel"] {font-size: .78rem; color: #607485;}
-[data-testid="stMetricValue"] {font-size: 1.75rem; font-weight: 750; color: #123343; letter-spacing: -.03em;}
+[data-testid="stVerticalBlockBorderWrapper"] > div {border-radius: 17px !important; background-color: #142131; border-color: #27384b !important;}
+[data-testid="stForm"] {border-radius: 17px; background: #142131; border-color: #27384b; padding: 1.3rem;}
+[data-testid="stFormSubmitButton"] button {border-radius: 10px; height: 2.8rem; font-weight: 700; color: #0b2029; background: #38cabb; border-color: #38cabb;}
+[data-testid="stMetric"] {background: #142131; border: 1px solid #27384b; border-radius: 14px; padding: 1rem 1.15rem;}
+[data-testid="stMetricLabel"] {font-size: .78rem; color: #a1b4c7;}
+[data-testid="stMetricValue"] {font-size: 1.75rem; font-weight: 750; color: #edf5fc; letter-spacing: -.03em;}
 h2, h3 {letter-spacing: -.025em;}
 h3 {font-size: 1.2rem !important;}
 .forecast-card {background: linear-gradient(125deg, #103242, #086472); color: white; padding: 1.6rem; border-radius: 18px; margin-bottom: .9rem;}
@@ -31,10 +31,10 @@ h3 {font-size: 1.2rem !important;}
 .forecast-value span {font-size: 1rem; letter-spacing: 0; font-weight: 500; color: #c6e8e9; margin-left: .4rem;}
 .forecast-range {border-top: 1px solid #ffffff25; padding-top: .8rem; color: #e0f2f3; font-size: .9rem; line-height: 1.7;}
 .forecast-change {font-size: .84rem; color: #c2e5e7; margin-top: .45rem;}
-.insight {padding: .95rem 1.1rem; border-left: 3px solid #0b8f96; background: #eaf5f5; color: #235563; border-radius: 0 10px 10px 0; font-size: .88rem; line-height: 1.65; margin: .9rem 0;}
-.step-card {border: 1px solid #dfe7ed; border-radius: 16px; background: #fff; padding: 1.3rem; min-height: 178px;}
-.step-number {font-size: .72rem; color: #087f8c; text-transform: uppercase; letter-spacing: .1em; font-weight: 750;}
-.step-card h3 {font-size: 1.1rem; margin: .45rem 0 .5rem; padding: 0; color: #133344;}
-.step-card p {font-size: .86rem; color: #607485; line-height: 1.65; margin: 0;}
-.footer {color: #7a8b98; font-size: .75rem; margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #dfe7ed;}
+.insight {padding: .95rem 1.1rem; border-left: 3px solid #40d6c5; background: #112f38; color: #b8dde2; border-radius: 0 10px 10px 0; font-size: .88rem; line-height: 1.65; margin: .9rem 0;}
+.step-card {border: 1px solid #27384b; border-radius: 16px; background: #142131; padding: 1.3rem; min-height: 178px;}
+.step-number {font-size: .72rem; color: #40d6c5; text-transform: uppercase; letter-spacing: .1em; font-weight: 750;}
+.step-card h3 {font-size: 1.1rem; margin: .45rem 0 .5rem; padding: 0; color: #e5edf5;}
+.step-card p {font-size: .86rem; color: #a1b4c7; line-height: 1.65; margin: 0;}
+.footer {color: #8ca2b7; font-size: .75rem; margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #27384b;}
 @media(max-width: 760px) {.hero {padding: 1.5rem;} .hero-art {display: none;} .stMainBlockContainer {padding-top: 3.25rem;} [data-testid="stTabs"] [data-baseweb="tab-list"] {gap: 1rem;} .forecast-value {font-size: 3.1rem;}}
