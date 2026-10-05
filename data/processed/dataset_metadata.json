@@ -1,0 +1,39 @@
+{
+  "dataset_name": "Household Electricity Consumption Prediction",
+  "synthetic": true,
+  "rows": 18000,
+  "households": 500,
+  "months_per_household": 36,
+  "date_range": [
+    "2022-01-01",
+    "2024-12-01"
+  ],
+  "seed": 42,
+  "reference_calibration_kwh_median": 650.0,
+  "reference_calibration_mode": "fallback",
+  "reference_calibration_note": "fallback calibration based on the UCI dataset's monthly scale",
+  "source_urls": {
+    "kaggle": "https://www.kaggle.com/datasets/uciml/electric-power-consumption-data-set",
+    "uci": "https://archive.ics.uci.edu/dataset/235/individual+household+electric+power+consumption"
+  },
+  "columns": [
+    "household_id",
+    "month",
+    "season",
+    "household_size",
+    "number_of_rooms",
+    "appliance_count",
+    "ac_usage_hours",
+    "previous_month_consumption",
+    "monthly_consumption"
+  ],
+  "missing_counts": {
+    "household_size": 219,
+    "number_of_rooms": 220,
+    "appliance_count": 332,
+    "ac_usage_hours": 553,
+    "previous_month_consumption": 486
+  },
+  "target_missing_count": 0,
+  "sha256": "2f9f5f93eedc505062176d478fd3fdc6ed3f31cf2308ae01469067e8f129443a"
+}
