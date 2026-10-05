@@ -1,0 +1,26 @@
+# Python and notebook cache
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ipynb_checkpoints/
+
+# Virtual environments and local configuration
+.venv/
+venv/
+env/
+*.env
+.DS_Store
+
+# Kaggle credentials and downloaded raw data (the source is documented in README)
+kaggle.json
+data/raw/
+*.zip
+*.7z
+*.7z.*
+*.csv.gz
+
+# Keep the small processed table and model metadata/artifact files available to
+# reviewers; only temporary exports and logs belong outside version control.
+artifacts/*.tmp
+artifacts/*.bak
+*.log
