@@ -62,16 +62,20 @@ After running the notebook and creating the artifacts:
 streamlit run app.py
 ```
 
-The app has four pages in the sidebar:
+The application follows the layout of the Wine Quality Predictor: a styled hero, example profiles, a prominent forecast card, and four tabs:
 
-- **Overview** shows record counts, validation cards, seasonal averages, and the monthly demand trend.
-- **Predict** accepts a household profile and returns the forecast with its RMSE-based planning range.
-- **Explore data** shows seasonal consumption spreads, previous-month relationships, and a filtered summary table.
-- **Model diagnostics** compares all five regressors and displays actual-versus-predicted and residual plots.
+- **Predict consumption** accepts a household profile, shows the expected error range, and compares controlled season and AC-usage scenarios. Submitted predictions remain visible when exploring the other tabs.
+- **Data explorer** filters records by season and year, plots household attributes and monthly histories, and downloads the filtered dataset.
+- **Model insights** compares all five regressors and shows held-out actual-versus-predicted, residual, feature-influence, and seasonal-performance charts.
+- **Project guide** explains the inputs, generation assumptions, evaluation, and limitations.
+
+The visual theme is defined in `.streamlit/config.toml` and `assets/app.css`. Interactive charts use Altair. Input bounds follow observed ranges in the processed dataset.
 
 Enter household size, number of rooms, appliance count, AC usage, season, and previous-month consumption. The app displays the predicted monthly consumption, the selected model, and an expected error range. The range is based on the validation RMSE (approximately `prediction ± RMSE`, clipped at zero where appropriate); it is a practical planning interval, not a formal prediction interval or a guarantee for an individual bill.
 
 If the app reports missing artifacts, run the notebook once more from the first cell so that the model, metrics, feature configuration, and any preprocessing objects are saved into `artifacts/`.
+
+The notebook also exports `artifacts/test_predictions.csv` and `artifacts/feature_importance.csv`. Diagnostic charts use the held-out model's predictions, while the prediction form uses the deployment pipeline refitted on the full dataset. Feature influence is the increase in test RMSE after shuffling an original input, averaged over five shuffles; correlated inputs can share predictive information.
 
 ## Limitations and real-world use
 
